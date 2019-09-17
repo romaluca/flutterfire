@@ -107,7 +107,7 @@ public class FlutterFirebaseMessagingService extends FirebaseMessagingService {
   @Override
   public void onMessageReceived(final RemoteMessage remoteMessage) {
     onCustomMessageReceived(remoteMessage); 
-    return;   
+    /*
     // If application is running in the foreground use local broadcast to handle message.
     // Otherwise use the background isolate to handle message.
     if (isApplicationForeground(this)) {
@@ -136,7 +136,7 @@ public class FlutterFirebaseMessagingService extends FirebaseMessagingService {
           Log.i(TAG, "Exception waiting to execute Dart callback", ex);
         }
       }
-    }
+    }*/    
   }
 
   private void onCustomMessageReceived(RemoteMessage remoteMessage) {
