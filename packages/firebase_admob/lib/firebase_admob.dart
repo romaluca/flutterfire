@@ -315,8 +315,6 @@ class BannerAd extends MobileAd {
 /// Ads SDK) is then responsible for displaying them.
 ///
 /// See the README for more details on using Native Ads.
-///
-/// Note: This is currently only supported for Android.
 class NativeAd extends MobileAd {
   NativeAd({
     @required String adUnitId,
@@ -325,15 +323,10 @@ class NativeAd extends MobileAd {
     MobileAdListener listener,
     this.customOptions,
   }) : super(
-            adUnitId: adUnitId,
-            targetingInfo: targetingInfo,
-            listener: listener) {
-    if (!Platform.isAndroid) {
-      throw UnimplementedError(
-        '$NativeAd is currently only available for Android',
-      );
-    }
-  }
+          adUnitId: adUnitId,
+          targetingInfo: targetingInfo,
+          listener: listener,
+        );
 
   /// Optional options used to create the [NativeAd].
   ///
@@ -496,7 +489,8 @@ class RewardedVideoAd {
 
   /// Loads a rewarded video ad using the provided ad unit ID.
   Future<bool> load(
-      {@required String adUnitId, MobileAdTargetingInfo targetingInfo}) {
+      {@required String adUnitId,
+      MobileAdTargetingInfo targetingInfo = const MobileAdTargetingInfo()}) {
     assert(adUnitId.isNotEmpty);
     return _invokeBooleanMethod("loadRewardedVideoAd", <String, dynamic>{
       'adUnitId': adUnitId,

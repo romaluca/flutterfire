@@ -73,6 +73,22 @@ Starting in version 7.42.0, you are required to add your AdMob app ID in your **
 
 Failure to add this tag will result in the app crashing at app launch with a message including *"GADVerifyApplicationID."*
 
+## Firebase related changes
+
+You are also required to ensure that you have Google Service file from Firebase inside your project.
+
+### iOS
+
+Create an "App" in firebase and generate a GoogleService-info.plist file. This file needs to be embedded in the projects "Runner/Runner" folder using Xcode. 
+
+https://firebase.google.com/docs/ios/setup#create-firebase-project -> Steps 1-3
+
+### Android
+
+Create an "App" in firebase and generate a google-service.json file. This file needs to be embedded in you projects "android/app" folder. 
+
+https://firebase.google.com/docs/android/setup#create-firebase-project -> Steps 1-3.1
+
 ## Using banners and interstitials
 Banner and interstitial ads can be configured with target information.
 And in the example below, the ads are given test ad unit IDs for a quick start.
@@ -195,9 +211,10 @@ Since Native Ads require UI components native to a platform, this feature requir
 for Android and iOS:
 
 ### Android
-The Android Admob Plugin requires a class that implements `NativeAdFactory` which implements `createNativeAd(
-[UnifiedNativeAd](https://developers.google.com/android/reference/com/google/android/gms/ads/formats/UnifiedNativeAd) nativeAd,
-Map<String, Options> customOptions)` and returns a
+The Android Admob Plugin requires a class that implements `NativeAdFactory` which contains a method
+that takes a
+[UnifiedNativeAd](https://developers.google.com/android/reference/com/google/android/gms/ads/formats/UnifiedNativeAd)
+and custom options and returns a
 [UnifiedNativeAdView](https://developers.google.com/android/reference/com/google/android/gms/ads/formats/UnifiedNativeAdView).
 
 You can implement this in your `MainActivity.java` or create a separate class in the same directory
@@ -285,8 +302,53 @@ An example of displaying a `UnifiedNativeAd` with a `UnifiedNativeAdView` can be
 a custom layout and displays the test Native ad.
 
 ### iOS
+Native Ads for iOS require a class that implements the protocol `FLTNativeAdFactory` which has a
+single method `createNativeAd:customOptions:`.
 
-Currently unsupported.
+You can have your `AppDelegate` implement this protocol or create a separate class as seen below:
+
+```objectivec
+/* AppDelegate.m */
+
+#import "FLTFirebaseAdMobPlugin.h"
+
+@interface NativeAdFactoryExample : NSObject<FLTNativeAdFactory>
+@end
+
+@implementation NativeAdFactoryExample
+- (GADUnifiedNativeAdView *)createNativeAd:(GADUnifiedNativeAd *)nativeAd
+                             customOptions:(NSDictionary *)customOptions {
+  // Create GADUnifiedNativeAdView
+}
+@end
+```
+
+Once there is an implementation of `FLTNativeAdFactory`, it must be added to the
+`FLTFirebaseAdMobPlugin`. This is done by importing `FLTFirebaseAdMobPlugin.h` and calling
+`registerNativeAdFactory:factoryId:nativeAdFactory:` with a `FlutterPluginRegistry`, a unique
+identifier for the factory, and the factory itself. The factory also *MUST* be added after
+`[GeneratedPluginRegistrant registerWithRegistry:self];` has been called.
+
+If this is done in `AppDelegate.m`, it should look similar to:
+
+```objectivec
+#import "FLTFirebaseAdMobPlugin.h"
+
+@implementation AppDelegate
+- (BOOL)application:(UIApplication *)application
+    didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+  [GeneratedPluginRegistrant registerWithRegistry:self];
+
+  NativeAdFactoryExample *nativeAdFactory = [[NativeAdFactoryExample alloc] init];
+  [FLTFirebaseAdMobPlugin registerNativeAdFactory:self
+                                        factoryId:@"adFactoryExample"
+                                  nativeAdFactory:nativeAdFactory];
+
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+
+@end
+```
 
 ### Dart Example
 
@@ -322,7 +384,6 @@ This plugin currently has some limitations:
 
 - Banner ads cannot be animated into view.
 - It's not possible to specify a banner ad's size.
-- There's no support for native ads.
 - The existing tests are fairly rudimentary.
 - There is no API doc.
 - The example should demonstrate how to show gate a route push with an
