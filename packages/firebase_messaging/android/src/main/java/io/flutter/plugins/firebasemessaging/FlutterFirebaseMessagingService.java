@@ -106,7 +106,7 @@ public class FlutterFirebaseMessagingService extends FirebaseMessagingService {
    */
   @Override
   public void onMessageReceived(final RemoteMessage remoteMessage) {
-    onCustomMessageReceived(remoteMessage); 
+    onCustomMessageReceived(remoteMessage);
     /*
     // If application is running in the foreground use local broadcast to handle message.
     // Otherwise use the background isolate to handle message.
@@ -136,7 +136,7 @@ public class FlutterFirebaseMessagingService extends FirebaseMessagingService {
           Log.i(TAG, "Exception waiting to execute Dart callback", ex);
         }
       }
-    }*/    
+    }*/
   }
 
   private void onCustomMessageReceived(RemoteMessage remoteMessage) {
@@ -193,8 +193,10 @@ public class FlutterFirebaseMessagingService extends FirebaseMessagingService {
             CharSequence name = "Shuttertop channel ";
             notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
-            notificationManager.createNotificationChannel(mChannel);
+            if(Build.VERSION.SDK_INT >= 26) {
+              NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+              notificationManager.createNotificationChannel(mChannel);
+            }
             notificationManager.notify(notificationId /* ID of notification */, notificationBuilder.build());
             Log.i("MessagingService", " NotificationManager Notify");
         } catch (Exception e) {
